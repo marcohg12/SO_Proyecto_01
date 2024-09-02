@@ -1,1 +1,1 @@
-sudo dnf install glib2 glib2-devel
+sudo dnf install gcc

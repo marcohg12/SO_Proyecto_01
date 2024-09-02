@@ -3,66 +3,60 @@
 // -----------------------------------------------------------------------------
 
 #include <stdio.h>
-#include <glib.h>
+#include <wchar.h>
+#include "minheap.h"
+#include "node.h"
+#include "dictionary.h"
 
-void print_char_frequencies(gpointer key, gpointer value, gpointer user_data) {
-    g_print("%s: %d\n", (gchar*)key, GPOINTER_TO_INT(value));
-}
+/**
+ * Retorna un diccionario con las frecuencias de cada caracter en el archivo
+ * 
+ * @param file_path La ruta del archivo donde se leen los caracteres
+ * @return El diccionario donde las llaves son los caracteres y los valores son las frecuencias de los caracteres
+ * @note La funcion asume que el archivo existe en la ruta dada
+ * @note EL cliente es dueño del puntero al diccionario, al terminar de usarlo debe destruilo
+ */
+Dictionary* create_word_freq_dict(const char* file_path) {
 
-GHashTable* create_word_freq_dict(char* file_path) {
-
-    GHashTable* dict = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    Dictionary* dict = create_dictionary(1024);
 
     FILE* file = fopen(file_path, "r");
 
-    // Obtenemos el largo del archivo
-    fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
-    rewind(file);
-
-    // Creamos un buffer para mantener el contenido del archivo
-    char* buffer = (char*)malloc(file_size + 1);
-
-    // Colocamos el contenido del archivo en el buffer
-    size_t bytes_read = fread(buffer, 1, file_size, file);
-    buffer[file_size] = '\0';
-
-    // Cerramos el archivo
-    fclose(file);
-
-    char* ptr = buffer;
-    char* end = buffer + bytes_read;
-
-    // Recorremos el buffer
-    while (ptr < end) {
-
-        // Obtenemos el largo del siguiente caracter
-        gchar* char_utf8 = g_utf8_next_char(ptr);
-        size_t char_len = char_utf8 - ptr;
-
-        // Obtenemos una copia del caracter
-        gchar* char_copy = g_strndup(ptr, char_len);
-
-        // Obtenemos la frecuencia del caracter en el diccionario
-        gpointer count = g_hash_table_lookup(dict, char_copy);
-
-        // Insertamos o actualizamos la frecuencia del caracter en el diccionario
-        if (count > 0) {
-            g_hash_table_replace(dict, char_copy, GUINT_TO_POINTER(GPOINTER_TO_UINT(count) + 1));
-        }
-        else {
-            g_hash_table_insert(dict, char_copy, GUINT_TO_POINTER(1));
-        }
-
-        // Nos movemos al siguiente caracter
-        ptr += char_len;
+    wint_t c;
+    while((c = fgetwc(file)) != WEOF){
+        insert_or_update(dict, (wchar_t)c, 1);
     }
 
-    g_hash_table_foreach(dict, (GHFunc)print_char_frequencies, NULL);
-    free(buffer);
+    fclose(file);
 
     return dict;
 }
+
+/**
+ * Retorna un min heap de nodos construido a partir de un diccionario
+ * Cada nodo se forma de un caracter y se frecuencia
+ * 
+ * @param dict El diccionario con el que se construyen los nodos
+ * @return Un min heap donde los elementos son nodos ordenados por la frecuencia del caracter
+ * @note Los nodos solo se inicializan con el caracter y la frecuencia, los demas atributos se dejan en NULL
+ * @note El cliente es dueño del puntero al min heap, al terminar de usarlo debe destruirlo
+ */
+MinHeap* get_min_heap_from_dict(Dictionary* dict){
+
+    MinHeap* heap = create_min_heap(1024);
+    
+    for (int i = 0; i < dict -> size; i++) {
+
+        Node* node = create_node(dict -> keys[i], dict -> values[i]);
+        insert_node(heap, node);
+    }
+
+    return heap;
+}
+
+
+
+
 
 
 

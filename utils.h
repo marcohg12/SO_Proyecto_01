@@ -1,3 +1,5 @@
-#include <glib.h>
+#include "minheap.h"
+#include "dictionary.h"
 
-GHashTable* create_word_freq_dict(char* file_path);
+Dictionary* create_word_freq_dict(char* file_path);
+MinHeap* get_min_heap_from_dict(Dictionary* dict);
