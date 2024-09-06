@@ -75,3 +75,21 @@ unsigned int get_value(Dictionary* dict, wchar_t c){
         }
     }
 }
+
+void insert_in_dict(Dictionary* dict, wchar_t c, unsigned int value){
+
+    if (dict -> size == dict -> capacity){
+        return;
+    }
+
+    dict -> keys[dict -> size] = c;
+    dict -> values[dict -> size] = value;
+    dict -> size++;
+}
+
+void print_dict(Dictionary* dict){
+
+    for (int i = 0; i < dict -> size; i++){
+        wprintf(L"%lc %d\n", dict -> keys[i], dict -> values[i]);
+    }
+}

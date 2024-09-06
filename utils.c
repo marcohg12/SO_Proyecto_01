@@ -54,9 +54,50 @@ MinHeap* get_min_heap_from_dict(Dictionary* dict){
     return heap;
 }
 
+void get_parent_directory(char *dir_path, char *parent_dir, int size) {
 
+    strncpy(parent_dir, dir_path, size);
 
+    char *last_slash = strrchr(parent_dir, '/');
 
+    if (last_slash != NULL) {
 
+        if (last_slash == parent_dir) {
+            parent_dir[1] = '\0';
+        } else {
+            *last_slash = '\0';
+        }
+    }
+}
 
+void save_dict_in_file(char* file_path, Dictionary* dict){
 
+    FILE *file = fopen(file_path, "w");
+
+    for (int i = 0; i < dict -> size; i++){
+        fprintf(file, "%u %d\n", (wint_t)dict -> keys[i], dict -> values[i]);
+    }
+
+    fprintf(file, "---\n");
+
+    fclose(file);
+}
+
+Dictionary* get_dict_from_file(char* file_path){
+
+    Dictionary *dict = create_dictionary(1024);
+
+    FILE *file = fopen(file_path, "r");
+
+    wint_t c;
+    unsigned int value;
+    int i;
+
+    while (i = fscanf(file, "%u %d\n", &c, &value) == 2){
+        insert_in_dict(dict, (wchar_t)c, value);
+    }
+
+    fclose(file);
+
+    return dict;
+}
