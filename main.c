@@ -6,8 +6,7 @@
 #include "dictionary.h"
 #include "wchar.h"
 
-void serial_comp(char* dir_path);
-void serial_decomp(char* dir_path);
+void parallel_comp(char* dir_path);
 
 int main() {
 
