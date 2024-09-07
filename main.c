@@ -5,15 +5,14 @@
 #include "huffman_tree.h"
 #include "dictionary.h"
 #include "wchar.h"
-
-void parallel_comp(char* dir_path);
+#include "serial_comp.h"
 
 int main() {
 
     setlocale(LC_ALL, "");
 
-    //serial_comp("/home/marco/Escritorio/Proyectos/SO_Proyecto_01/Libros");
-    serial_decomp("/home/marco/Escritorio/Proyectos/SO_Proyecto_01/Libros.tar");
+    //serial_comp("/home/marco/Escritorio/Proyectos/SO_Proyecto_01/tests/books");
+    serial_decomp("/home/marco/Escritorio/Proyectos/SO_Proyecto_01/tests/books.tar");
 
     return 0;
 }

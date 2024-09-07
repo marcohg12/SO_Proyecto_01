@@ -14,6 +14,7 @@
 #include "dictionary.h"
 #include "minheap.h"
 #include "huffman_tree.h"
+#include "code_list.h"
 #define COMMAND_SIZE 512
 #define PATH_SIZE 512
 #define FILE_NAME_SIZE 128
@@ -59,10 +60,7 @@ void serial_comp(char* dir_path) {
     get_last_name(dir_path, dir_name, sizeof(dir_name));
     char command[COMMAND_SIZE];
 
-    snprintf(command, sizeof(command), "cd %s", parent_dir);
-    system(command);
-
-    snprintf(command, sizeof(command), "tar -cf %s.tar -C %s .", dir_name, "comp_temp");
+    snprintf(command, sizeof(command), "cd %s && tar -cf %s.tar -C %s .", parent_dir, dir_name, "comp_temp");
     system(command);
 
     // Elimina la carpeta temporal con los archivos comprimidos
@@ -83,7 +81,7 @@ void compress_file(char* file_path, char* filename, char* comp_dir_path) {
     char comp_file_path[PATH_SIZE];
     snprintf(comp_file_path, sizeof(comp_file_path), "%s/%s", comp_dir_path, filename);
 
-    wprintf(L"Comprimiendo: %s y guardando en %s\n", file_path, comp_file_path);
+    //wprintf(L"Comprimiendo: %s y guardando en %s\n", file_path, comp_file_path);
 
     // Obtenemos el diccionario de caracteres para el archivo
     Dictionary* dict = create_word_freq_dict(file_path);
@@ -91,6 +89,9 @@ void compress_file(char* file_path, char* filename, char* comp_dir_path) {
     // Creamos el arbol de huffman para el archivo
     MinHeap* heap = get_min_heap_from_dict(dict);
     Node* root = create_huffman_tree(heap);
+
+    // Creamos una lista con los codigos de huffman para cada caracter
+    CodeList* codes = create_code_list(dict, root, dict -> capacity);
 
     // Guardamos el diccionario en el archivo
     save_dict_in_file(comp_file_path, dict);
@@ -101,14 +102,13 @@ void compress_file(char* file_path, char* filename, char* comp_dir_path) {
     unsigned char byte = 0;
     int bits = 0;
     unsigned int total_bits = 0;
-    Node* root_temp = root;
 
     // Recorremos el archivo y por cada caracter
     wchar_t c;
     while ((c = fgetwc(input)) != WEOF) {
 
         // Obtenemos el codigo para el caracter
-        char* code = get_huffman_code(root, c);
+        char* code = get_char_code(codes, c);
         int code_len = strlen(code);
 
         // Escribimos el codigo en binario en el archivo temporal
@@ -125,8 +125,6 @@ void compress_file(char* file_path, char* filename, char* comp_dir_path) {
                 byte = 0;
             }
         }
-
-        free(code);
     }
 
     // Escribimos los bits restantes en el archivo temporal
@@ -147,15 +145,19 @@ void compress_file(char* file_path, char* filename, char* comp_dir_path) {
     // Escribimos la codificacion contenida en el archivo temporal en el archivo comprimido
     output = fopen(comp_file_path, "ab");
 
-    char temp_data[256];
-    int bytes_read;
-    while ((bytes_read = fread(temp_data, 1, sizeof(temp_data), temp_file)) > 0) {
-        fwrite(temp_data, 1, bytes_read, output);
-    }
+    unsigned long file_size = get_file_size(temp_file);
+
+    char* temp_data = (char*)malloc(file_size);
+
+    int bytes_read = fread(temp_data, 1, file_size, temp_file);
+    fwrite(temp_data, 1, bytes_read, output);
+
+    free(temp_data);
 
     fclose(output);
     fclose(temp_file);
 
+    destroy_code_list(codes);
     destroy_dictionary(dict);
     destroy_min_heap(heap);
     destroy_huffman_tree(root);

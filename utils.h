@@ -13,5 +13,6 @@ void get_last_name(const char* path, char* buffer, int buffer_size);
 void delete_directory(char* dir_path);
 void get_unique_dir_name(char* base_name, char* dir_name, int dir_name_size, char* parent_dir);
 void get_filename_without_extension(char* file_path, char* output);
+unsigned long get_file_size(FILE* file);
 
 #endif
