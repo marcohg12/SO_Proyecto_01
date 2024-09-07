@@ -67,3 +67,49 @@ void parallel_comp(char* dir_path){
 
     closedir(dir);
 }
+
+
+void parallel_decomp(char* dir_path){
+    struct dirent *entry;
+    char file_path[FILE_PATH_SIZE];
+    char decomp_dir_path[COMP_DIR_SIZE];
+    char parent_dir[PARENT_DIR_SIZE];
+    pid_t pid;
+
+    DIR *dir = opendir(dir_path);
+
+    // Obtenemos el directorio padre
+    get_parent_directory(dir_path, parent_dir, PARENT_DIR_SIZE);
+
+    // Creamos el directorio donde se guardan los archivos descomprimidos
+    snprintf(decomp_dir_path, sizeof(decomp_dir_path), "%s/%s", parent_dir, "parallel_decomp_temp");
+    mkdir(decomp_dir_path, 0755);
+
+    while((entry = readdir(dir)) != NULL){
+        if(entry->d_name[0] == '.'){
+            continue;
+        }
+
+        // Obtenemos la ruta completa de cada archivo
+        snprintf(file_path, sizeof(file_path), "%s%s", dir_path,  entry->d_name);
+
+        // Creamos un nuevo proceso para descomprimer el archivo
+        pid = fork();
+
+        if(pid == 0){
+            // Proceso hijo
+            decompress_file(file_path, entry->d_name, decomp_dir_path);
+            exit(0);
+        } else if (pid < 0) {
+            // Error al crear el proceso 
+            perror("fork");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Esperamos a que todos los procesos hijos terminen 
+    while (wait(NULL) > 0);
+
+    closedir(dir);
+
+}
