@@ -21,7 +21,6 @@
 #define COMP_DIR_SIZE 256
 #define PARENT_DIR_SIZE 256
 
-
 void parallel_comp(char* dir_path){
     struct dirent *entry;
     char file_path[FILE_PATH_SIZE];

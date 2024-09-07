@@ -14,5 +14,6 @@ int main(){
 
     parallel_comp("/home/arianaalvarado/Descargas/textos");
     
+    
     return 0;
 }
