@@ -6,13 +6,13 @@
 #include "dictionary.h"
 #include "wchar.h"
 
-void serial_comp(char* dir_path);
+void parallel_comp(char* dir_path);
 
 int main(){
 
     setlocale(LC_ALL, "");
 
-    serial_comp("/home/marco/Descargas/textos");
+    parallel_comp("/home/arianaalvarado/Descargas/textos");
     
     return 0;
 }
