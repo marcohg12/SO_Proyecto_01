@@ -1,7 +1,6 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <glib.h>
 #include <wchar.h>
 
 typedef struct Node {
