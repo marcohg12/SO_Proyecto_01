@@ -81,8 +81,6 @@ void compress_file(char* file_path, char* filename, char* comp_dir_path) {
     char comp_file_path[PATH_SIZE];
     snprintf(comp_file_path, sizeof(comp_file_path), "%s/%s", comp_dir_path, filename);
 
-    //wprintf(L"Comprimiendo: %s y guardando en %s\n", file_path, comp_file_path);
-
     // Obtenemos el diccionario de caracteres para el archivo
     Dictionary* dict = create_word_freq_dict(file_path);
 
@@ -231,8 +229,6 @@ void decompress_file(char* file_path, char* filename, char* decomp_dir_path) {
 
     char decomp_file_path[FILE_NAME_SIZE];
     snprintf(decomp_file_path, sizeof(decomp_file_path), "%s/%s", decomp_dir_path, filename);
-
-    wprintf(L"Descomprimiendo: %s y guardando en %s\n", file_path, decomp_file_path);
 
     // Obtenemos el diccionario de frecuencias del archivo
     Dictionary* dict = get_dict_from_file(file_path);
