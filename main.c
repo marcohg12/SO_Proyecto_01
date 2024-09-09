@@ -15,7 +15,6 @@ int main() {
 
     parallel_decomp("/home/arianaalvarado/Descargas/Proyecto1_SO/SO_Proyecto_01/parallel_comp_temp");
     
-    
     //serial_comp("/home/marco/Escritorio/Proyectos/SO_Proyecto_01/Libros");
     //serial_decomp("/home/marco/Escritorio/Proyectos/SO_Proyecto_01/Libros.tar");
 
