@@ -58,8 +58,8 @@ void serial_comp(char* dir_path) {
     // Crea un archivo para la carpeta con los archivos comprimidos
     char dir_name[FILE_NAME_SIZE];
     get_last_name(dir_path, dir_name, sizeof(dir_name));
-    char command[COMMAND_SIZE];
 
+    char command[COMMAND_SIZE];
     snprintf(command, sizeof(command), "cd %s && tar -cf %s.tar -C %s .", parent_dir, dir_name, "comp_temp");
     system(command);
 
