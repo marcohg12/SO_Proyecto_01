@@ -3,6 +3,8 @@
 #include <locale.h>
 #include <time.h>
 #include "serial_comp.h"
+#include "fork_comp.h"
+#include "thread_comp.h"
 
 int main(int argc, char* argv[]) {
 
@@ -44,6 +46,7 @@ int main(int argc, char* argv[]) {
     }
     else if (thread_comp_f) {
         printf("Comprimiendo con hilos...\n");
+        comp_func = thread_comp;
 
     }
 

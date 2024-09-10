@@ -6,13 +6,14 @@
 #include "dictionary.h"
 #include "wchar.h"
 #include "serial_comp.h"
+#include "thread_comp.h"
 
 int main() {
 
     setlocale(LC_ALL, "");
 
     //serial_comp("/home/marco/Escritorio/Proyectos/SO_Proyecto_01/tests/books");
-    serial_decomp("/home/marco/Escritorio/Proyectos/SO_Proyecto_01/tests/books.tar");
-
+    //serial_decomp("/home/marco/Escritorio/Proyectos/SO_Proyecto_01/tests/books.tar");
+    thread_comp("/home/paulaapu/Documentos/SO_Proyecto_01/tests/books");
     return 0;
 }
