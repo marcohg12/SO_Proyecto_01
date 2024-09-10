@@ -3,6 +3,7 @@
 #include <locale.h>
 #include <time.h>
 #include "serial_comp.h"
+#include "thread_comp.h"
 
 int main(int argc, char* argv[]) {
 
@@ -44,6 +45,7 @@ int main(int argc, char* argv[]) {
     }
     else if (thread_decomp_f) {
         printf("Descomprimiendo con hilos...\n");
+        decomp_func = thread_comp;
 
     }
 
