@@ -260,3 +260,17 @@ void get_filename_without_extension(char* file_path, char* buffer) {
         strcpy(buffer, filename);
     }
 }
+
+/**
+ * Obtiene el tamaño de un archivo
+ *
+ * @param file Un puntero al archivo
+ * @return El tamaño del archivo
+ * @note El puntero del archivo apunta al inicio tras usar la funcion
+ */
+unsigned long get_file_size(FILE* file) {
+    fseek(file, 0, SEEK_END);
+    unsigned long size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    return size;
+}
