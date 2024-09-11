@@ -22,20 +22,26 @@
 #define FILE_NAME_SIZE 128
 #define MAX_THREADS 100
 
-// Estructura para pasar los argumentos a los hilos
+// Estructura para pasar los argumentos a los hilos para comprimir
 typedef struct {
     char file_path[PATH_SIZE];
     char file_name[PATH_SIZE];
     char comp_dir_path[PATH_SIZE];
 } thread_args_comp;
 
-// Estructura para los argumentos del hilo
+// Estructura para pasar los argumentos a los hilos para descomprimir
 typedef struct {
     char file_path[PATH_SIZE];
-    char extract_dir_path[PATH_SIZE];
-} thread_args_descomp;
+    char file_name[PATH_SIZE];
+    char decomp_dir_path[PATH_SIZE];
+} thread_args_decomp;
 
-// Función que comprime un archivo
+
+/**
+ * Funcion auxiliar que comprime el archivo con un hilo
+ *
+ * @param args con el struct de los parametros que necesita la funcion compress_file
+ */
 void* compress_file_thread(void* args) {
 
     thread_args_comp* file_args = (thread_args_comp*)args;
@@ -47,19 +53,27 @@ void* compress_file_thread(void* args) {
     return NULL;
 }
 
-// Función que descomprime un archivo
+/**
+ * Funcion auxiliar para descomprimir un archivo con un hilo
+ *
+ * @param aargs con el struct de los parametros que necesita la funcion decompress_file
+ */
 void* decompress_file_thread(void* args) {
-    thread_args_descomp* file_args = (thread_args_descomp*)args;
+    thread_args_comp* file_args = (thread_args_comp*)args;
     char command[COMMAND_SIZE];
 
     // Construye el comando para descomprimir el archivo
-    snprintf(command, sizeof(command), "tar -xf %s -C %s", file_args->file_path, file_args->extract_dir_path);
-    system(command);
+    decompress_file(file_args->file_path, file_args->file_name, file_args->comp_dir_path);
 
     free(file_args);
     return NULL;
 }
 
+/**
+ * Toma un directorio y comprime todos los archivos del mismo en un nuevo directorio
+ *
+ * @param dir_path La ruta del directorio a comprimir
+ */
 void thread_comp(char* dir_path) {
 
     struct dirent* entry;
@@ -122,64 +136,81 @@ void thread_comp(char* dir_path) {
     closedir(dir);
 }
 
+/**
+ * Toma un directorio y descomprime todos los archivos del mismo en un nuevo directorio
+ *
+ * @param dir_path La ruta del directorio a descomprimir
+ */
 void thread_decomp(char* dir_path) {
     struct dirent* entry;
     char file_path[PATH_SIZE];
-    char extract_dir_path[PATH_SIZE];
+    char decomp_dir_path[PATH_SIZE];
     char parent_dir[PATH_SIZE];
+    char temp_dir_path[PATH_SIZE];
+    char comp_filename[FILE_NAME_SIZE];
+    char decomp_dir_name[FILE_NAME_SIZE];
+    char command[COMMAND_SIZE];
 
-    DIR* dir = opendir(dir_path);
-    if (!dir) {
-        perror("opendir");
-        return;
-    }
-
-    // Obtén el directorio padre
+    // Se obtiene el directorio padre
     get_parent_directory(dir_path, parent_dir, sizeof(parent_dir));
 
-    // Crea el directorio temporal donde se guardan los archivos extraídos
-    snprintf(extract_dir_path, sizeof(extract_dir_path), "%s/%s", parent_dir, "decomp_temp");
-    mkdir(extract_dir_path, 0755);
+    // Se crea la carpeta temporal con los archivos comprimidos
+    snprintf(temp_dir_path, sizeof(temp_dir_path), "%s/%s", parent_dir, "comp_temp");
+    mkdir(temp_dir_path, 0755);
+
+    snprintf(command, sizeof(command), "cd %s && tar -xf %s", temp_dir_path, dir_path);
+    system(command);
+
+    // Se crea el directorio donde se guardan los archivos descomprimidos
+    // El directorio se crea en el directorio padre
+    get_filename_without_extension(dir_path, comp_filename);
+    get_unique_dir_name(comp_filename, decomp_dir_name, sizeof(decomp_dir_name), parent_dir);
+
+    snprintf(decomp_dir_path, sizeof(decomp_dir_path), "%s/%s", parent_dir, decomp_dir_name);
+    mkdir(decomp_dir_path, 0755);
+
+    DIR* dir = opendir(temp_dir_path);
+
 
     // Se crea un arreglo para almacenar los identificadores de los hilos
     pthread_t threads[MAX_THREADS];
     int thread_count = 0;
 
-    // Itera por los archivos del directorio
+    // Se itera por los archivos del directorio
     while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.') {
+
+        if (entry -> d_name[0] == '.') {
             continue;
         }
 
         // Se obtiene la ruta completa de cada archivo
-        snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, entry->d_name);
+        snprintf(file_path, sizeof(file_path), "%s/%s", temp_dir_path, entry -> d_name);
 
-        // Verifica si el archivo es un archivo comprimido
-        if (strstr(entry->d_name, ".tar")) {
-            // Crea una estructura de argumentos para el hilo
-            thread_args_descomp* args = malloc(sizeof(thread_args_descomp));
-            snprintf(args->file_path, sizeof(args->file_path), "%s", file_path);
-            snprintf(args->extract_dir_path, sizeof(args->extract_dir_path), "%s", extract_dir_path);
 
-            // Crea el hilo para descomprimir el archivo
-            pthread_create(&threads[thread_count], NULL, decompress_file_thread, args);
+        // Se crea una estructura de argumentos para el hilo
+        thread_args_decomp* args = malloc(sizeof(thread_args_decomp));
+        snprintf(args -> file_path, sizeof(args -> file_path), "%s", file_path);
+        snprintf(args -> file_name, sizeof(args -> file_name), "%s", entry -> d_name);
+        snprintf(args -> decomp_dir_path, sizeof(args -> decomp_dir_path), "%s", decomp_dir_path);
 
-            thread_count++;
-            if (thread_count >= MAX_THREADS) {
-                break; // No crear más hilos si hemos alcanzado el máximo
-            }
+        // Se Crea el hilo para descomprimir el archivo
+        pthread_create(&threads[thread_count], NULL, decompress_file_thread, args);
+
+        thread_count++;
+        if (thread_count >= MAX_THREADS) {
+            break; 
         }
     }
 
-    // Espera a que todos los hilos terminen
+    // Se espera a que todos los hilos terminen
     for (int i = 0; i < thread_count; i++) {
         pthread_join(threads[i], NULL);
     }
 
-    // Elimina la carpeta temporal con los archivos extraídos
-    delete_directory(extract_dir_path);
-
     closedir(dir);
-}
 
+    // Se elimina la carpeta temporal con los archivos extraÃ­dos
+    delete_directory(temp_dir_path);
+
+}
 

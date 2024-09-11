@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     }
     else if (thread_decomp_f) {
         printf("Descomprimiendo con hilos...\n");
-        decomp_func = thread_comp;
+        decomp_func = thread_decomp;
 
     }
 
