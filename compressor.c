@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
     }
     else if (fork_comp_f) {
         printf("Comprimiendo con fork...\n");
+        comp_func = parallel_comp;
     }
     else if (thread_comp_f) {
         printf("Comprimiendo con hilos...\n");

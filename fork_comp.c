@@ -24,7 +24,14 @@
 #define FILE_NAME_SIZE 128
 #define PATH_SIZE 512
 
+
+/**
+ * Toma un directorio y comprime todos los archivos del mismo en un nuevo directorio
+ *
+ * @param dir_path La ruta del directorio a comprimir
+ */
 void parallel_comp(char* dir_path){
+
     struct dirent *entry;
     char file_path[FILE_PATH_SIZE];
     char comp_dir_path[COMP_DIR_SIZE];
@@ -34,7 +41,7 @@ void parallel_comp(char* dir_path){
     DIR *dir = opendir(dir_path);
 
     // Obtenemos el directorio padre
-    get_parent_directory(dir_path, parent_dir, PARENT_DIR_SIZE);
+    get_parent_directory(dir_path, parent_dir, sizeof(parent_dir));
 
     // Creamos el directorio donde se guardan los archivos comprimidos
     // El directorio se crea en el directorio padre
@@ -67,6 +74,21 @@ void parallel_comp(char* dir_path){
 
     // Esperamos a que todos los procesos hijos terminen
     while (wait(NULL) > 0);
+
+
+    // Crea un archivo para la carpeta con los archivos comprimidos
+    char dir_name[FILE_NAME_SIZE];
+    // Crear archivo tar con los archivos comprimidos
+    get_last_name(dir_path, dir_name, sizeof(dir_name));
+
+
+    char command[COMMAND_SIZE];
+    snprintf(command, sizeof(command), "cd %s && tar -cf %s.tar -C %s .", parent_dir, dir_name, "parallel_comp_temp");
+    system(command);
+
+    // Eliminar el directorio temporal
+    delete_directory(comp_dir_path);
+
 
     closedir(dir);
 }

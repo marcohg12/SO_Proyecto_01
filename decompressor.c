@@ -4,6 +4,7 @@
 #include <time.h>
 #include "serial_comp.h"
 #include "thread_comp.h"
+#include "fork_comp.h"
 
 int main(int argc, char* argv[]) {
 
@@ -42,6 +43,7 @@ int main(int argc, char* argv[]) {
     }
     else if (fork_decomp_f) {
         printf("Descomprimiendo con fork...\n");
+        decomp_func = parallel_decomp;
     }
     else if (thread_decomp_f) {
         printf("Descomprimiendo con hilos...\n");
