@@ -18,7 +18,13 @@ int main(int argc, char* argv[]) {
 
     if (argc <= 1) {
         printf("Error: debe indicar la ruta del directorio a comprimir\n");
-        return 1;
+        printf("Para utilizar el compresor debe ingresar primero la ruta del directorio a comprimir.\n");
+        printf("Luego puede indicar el modo de compresión con:\n");
+        printf("    1: modo serial\n");
+        printf("    2: con fork\n");
+        printf("    3: con hilos\n");
+        printf("Si no ingresa el tipo el compresor utiliza el modo serial por defecto\n");
+        return -1;
     }
 
     char* dir_path = argv[1];

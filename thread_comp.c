@@ -2,6 +2,7 @@
 // Este archivo contiene la version del algoritmo de compresion
 // utilizando hilos de la biblioteca pthread
 // -----------------------------------------------------------------------------
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,13 +41,14 @@ typedef struct {
 /**
  * Funcion auxiliar que comprime el archivo con un hilo
  *
- * @param args con el struct de los parametros que necesita la funcion compress_file
+ * @param aargs Un puntero a un struct con los parametros que necesita la funcion compress_file
+ * @note El struct se debe castear a un puntero a void al pasarlo por parametro
  */
 void* compress_file_thread(void* args) {
 
     thread_args_comp* file_args = (thread_args_comp*)args;
 
-    compress_file(file_args->file_path, file_args->file_name, file_args->comp_dir_path);
+    compress_file(file_args -> file_path, file_args -> file_name, file_args -> comp_dir_path);
 
     free(file_args);
 
@@ -56,16 +58,17 @@ void* compress_file_thread(void* args) {
 /**
  * Funcion auxiliar para descomprimir un archivo con un hilo
  *
- * @param aargs con el struct de los parametros que necesita la funcion decompress_file
+ * @param aargs Un puntero a un struct con los parametros que necesita la funcion decompress_file
+ * @note El struct se debe castear a un puntero a void al pasarlo por parametro
  */
 void* decompress_file_thread(void* args) {
-    thread_args_comp* file_args = (thread_args_comp*)args;
-    char command[COMMAND_SIZE];
 
-    // Construye el comando para descomprimir el archivo
-    decompress_file(file_args->file_path, file_args->file_name, file_args->comp_dir_path);
+    thread_args_comp* file_args = (thread_args_comp*)args;
+
+    decompress_file(file_args -> file_path, file_args -> file_name, file_args -> comp_dir_path);
 
     free(file_args);
+
     return NULL;
 }
 
@@ -82,6 +85,10 @@ void thread_comp(char* dir_path) {
     char parent_dir[PATH_SIZE];
 
     DIR* dir = opendir(dir_path);
+    if (dir == NULL) {
+        printf("Error: Debe indicar la ruta a un directorio existente\n");
+        exit(-1);
+    }
 
     // Obtenemos el directorio padre
     get_parent_directory(dir_path, parent_dir, sizeof(parent_dir));
@@ -142,6 +149,7 @@ void thread_comp(char* dir_path) {
  * @param dir_path La ruta del directorio a descomprimir
  */
 void thread_decomp(char* dir_path) {
+
     struct dirent* entry;
     char file_path[PATH_SIZE];
     char decomp_dir_path[PATH_SIZE];
@@ -159,7 +167,11 @@ void thread_decomp(char* dir_path) {
     mkdir(temp_dir_path, 0755);
 
     snprintf(command, sizeof(command), "cd %s && tar -xf %s", temp_dir_path, dir_path);
-    system(command);
+    if (system(command) != 0) {
+        delete_directory(temp_dir_path);
+        printf("Error: Debe indicar la ruta a un archivo .tar existente\n");
+        exit(-1);
+    }
 
     // Se crea el directorio donde se guardan los archivos descomprimidos
     // El directorio se crea en el directorio padre
@@ -170,7 +182,6 @@ void thread_decomp(char* dir_path) {
     mkdir(decomp_dir_path, 0755);
 
     DIR* dir = opendir(temp_dir_path);
-
 
     // Se crea un arreglo para almacenar los identificadores de los hilos
     pthread_t threads[MAX_THREADS];
@@ -186,7 +197,6 @@ void thread_decomp(char* dir_path) {
         // Se obtiene la ruta completa de cada archivo
         snprintf(file_path, sizeof(file_path), "%s/%s", temp_dir_path, entry -> d_name);
 
-
         // Se crea una estructura de argumentos para el hilo
         thread_args_decomp* args = malloc(sizeof(thread_args_decomp));
         snprintf(args -> file_path, sizeof(args -> file_path), "%s", file_path);
@@ -198,7 +208,7 @@ void thread_decomp(char* dir_path) {
 
         thread_count++;
         if (thread_count >= MAX_THREADS) {
-            break; 
+            break;
         }
     }
 
@@ -211,6 +221,5 @@ void thread_decomp(char* dir_path) {
 
     // Se elimina la carpeta temporal con los archivos extraÃ­dos
     delete_directory(temp_dir_path);
-
 }
 

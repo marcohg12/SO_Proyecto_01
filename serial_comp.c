@@ -32,6 +32,10 @@ void serial_comp(char* dir_path) {
     char parent_dir[PATH_SIZE];
 
     DIR* dir = opendir(dir_path);
+    if (dir == NULL) {
+        printf("Error: Debe indicar la ruta a un directorio existente\n");
+        exit(-1);
+    }
 
     // Obtenemos el directorio padre
     get_parent_directory(dir_path, parent_dir, sizeof(parent_dir));
@@ -181,12 +185,15 @@ void serial_decomp(char* dir_path) {
     get_parent_directory(dir_path, parent_dir, sizeof(parent_dir));
 
     // Volvemos a crear la carpeta temporal con los archivos comprimidos
-
     snprintf(temp_dir_path, sizeof(temp_dir_path), "%s/%s", parent_dir, "comp_temp");
     mkdir(temp_dir_path, 0755);
 
     snprintf(command, sizeof(command), "cd %s && tar -xf %s", temp_dir_path, dir_path);
-    system(command);
+    if (system(command) != 0) {
+        delete_directory(temp_dir_path);
+        printf("Error: Debe indicar la ruta a un archivo .tar existente\n");
+        exit(-1);
+    }
 
     // Creamos el directorio donde se guardan los archivos descomprimidos
     // El directorio se crea en el directorio padre

@@ -17,8 +17,14 @@ int main(int argc, char* argv[]) {
     void (*decomp_func)(char*);
 
     if (argc <= 1) {
-        printf("Error: debe indicar la ruta del directorio a descomprimir\n");
-        return 1;
+        printf("Error: debe indicar la ruta del archivo .tar a descomprimir\n");
+        printf("Para utilizar el descompresor debe ingresar primero la ruta del archivo .tar a descomprimir.\n");
+        printf("Luego puede indicar el modo de descompresión con:\n");
+        printf("    1: modo serial\n");
+        printf("    2: con fork\n");
+        printf("    3: con hilos\n");
+        printf("Si no ingresa el tipo el descompresor utiliza el modo serial por defecto\n");
+        return -1;
     }
 
     char* dir_path = argv[1];
