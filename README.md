@@ -36,14 +36,14 @@ Una vez que se haya completado la instalación se deben producir dos archivos ej
 terminal de comandos en la carpeta donde se encuentran los ejecutables. Para usar el programa de compresión use el siguiente comando en la terminal:
 
 ```bash
-./compressor
+./compressor <ruta del directorio a comprimir> <tipo de implementación>
 ```
 Para usar el programa de descompresión use el siguiente comando en la terminal:
 
 ```bash
-./decompressor
+./decompressor <ruta del archivo tar a descomprimir> <tipo de implementación>
 ```
 
-Al ejecutar cada uno de estos comandos va a recibir instrucciones detalladas de cómo utilizar los programas.
+Para ambos comandos el tipo de implementación se indica con 1 para usar la implementación serial, 2 para usar la implementación con procesos y 3 para usar la implementación con hilos. El tipo de implementación también es opcional, si no se coloca un valor se utiliza la implementación serial por defecto. Puede invocar cualquiera de los dos programas sin argumentos para recibir instrucciones de uso desde la terminal.
 
 
