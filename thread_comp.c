@@ -21,7 +21,7 @@
 #define PATH_SIZE 512
 #define COMMAND_SIZE 512
 #define FILE_NAME_SIZE 128
-#define MAX_THREADS 100
+#define MAX_THREADS 1024
 
 // Estructura para pasar los argumentos a los hilos para comprimir
 typedef struct {
