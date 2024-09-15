@@ -1,1 +1,1 @@
-sudo dnf install gcc
+sudo dnf install -y gcc
