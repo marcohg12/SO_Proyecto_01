@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
     long nanoseconds = end.tv_nsec - start.tv_nsec;
     long total_nanoseconds = seconds * 1000000000L + nanoseconds;
 
-    printf("Tiempo de descompresión: %ld nanosegundos, o %ld segundos\n", total_nanoseconds, seconds);
+    printf("Tiempo de descompresión: %ld nanosegundos\n", total_nanoseconds);
 
     return 0;
 }
